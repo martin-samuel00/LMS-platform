@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/responsive-hub.css') }}">
+    <script src="{{ asset('js/responsive-hub.js') }}" defer></script>
     @vite(['resources/js/app.js'])
     <script>
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -655,6 +657,11 @@
             <span>&larr;</span>
             <span>Back to Classrooms</span>
         </a>
+        <button type="button" class="mobile-nav-toggle" aria-label="Toggle navigation">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
         <div class="nav-links">
             <button type="button" class="btn-theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Theme">
                 <span id="theme-icon">🌙</span>

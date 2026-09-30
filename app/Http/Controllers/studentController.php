@@ -78,8 +78,8 @@ class studentController extends Controller
             ->get();
 
         $user = Auth::user();
-        $enrolledClassroomIds = $user->enrolledClassrooms()->pluck('classrooms.id')->toArray();
-        $pendingClassroomIds = $user->pendingClassrooms()->pluck('classrooms.id')->toArray();
+        $enrolledClassroomIds = $user ? $user->enrolledClassrooms()->pluck('classrooms.id')->toArray() : [];
+        $pendingClassroomIds = $user ? $user->pendingClassrooms()->pluck('classrooms.id')->toArray() : [];
 
         return view('students.teachers-search', compact('teachers', 'query', 'enrolledClassroomIds', 'pendingClassroomIds'));
     }

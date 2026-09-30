@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/responsive-hub.css') }}">
+    <script src="{{ asset('js/responsive-hub.js') }}" defer></script>
     @vite(['resources/js/app.js'])
     <script>
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -361,16 +363,55 @@
             margin-bottom: 12px;
         }
 
-        @media (max-width: 800px) {
+        .btn-back-contacts {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            border-radius: 8px;
+            background: var(--card-subtle);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+
+        .btn-back-contacts:hover {
+            background: var(--highlight);
+            color: #ffffff;
+            border-color: var(--highlight);
+        }
+
+        @media (max-width: 768px) {
+            .btn-back-contacts {
+                display: inline-flex !important;
+            }
             .chat-app {
-                grid-template-columns: 1fr;
-                height: auto;
+                grid-template-columns: 1fr !important;
+                height: calc(100vh - 100px) !important;
+                border-radius: 12px;
+                overflow: hidden;
             }
-            .sidebar {
-                max-height: 280px;
+            .chat-app.has-selected-user .sidebar {
+                display: none !important;
             }
-            .chat-pane {
-                height: 500px;
+            .chat-app.no-selected-user .chat-pane {
+                display: none !important;
+            }
+            .chat-app.no-selected-user .sidebar {
+                max-height: 100% !important;
+                height: 100% !important;
+                border-right: none;
+            }
+            .chat-app.has-selected-user .chat-pane {
+                height: 100% !important;
+            }
+            .chat-header {
+                padding: 12px 14px;
+                gap: 10px;
             }
         }
     </style>
@@ -381,6 +422,11 @@
             <span class="brand-badge">🎓</span>
             <span>Classroom Hub</span>
         </a>
+        <button type="button" class="mobile-nav-toggle" aria-label="Toggle navigation">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
         <div class="nav-links">
             <button type="button" onclick="toggleTheme()" class="btn-theme-toggle" title="Toggle Light/Dark Theme">
                 <span id="theme-icon">🌙</span>
@@ -402,7 +448,7 @@
         </div>
     </nav>
 
-    <div class="chat-app">
+    <div class="chat-app {{ $selectedUser ? 'has-selected-user' : 'no-selected-user' }}">
         <!-- Sidebar Contacts -->
         <div class="sidebar">
             <div class="sidebar-header">
@@ -432,6 +478,7 @@
         <div class="chat-pane">
             @if ($selectedUser)
                 <div class="chat-header">
+                    <a href="{{ route('messages.index') }}" class="btn-back-contacts" title="Back to conversations">&larr; Chats</a>
                     <div class="avatar">{{ substr($selectedUser->name, 0, 1) }}</div>
                     <div>
                         <h3>{{ $selectedUser->name }}</h3>

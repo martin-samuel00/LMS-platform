@@ -1,0 +1,12 @@
+/node_modules
+/storage/framework/cache
+/storage/framework/testing
+/storage/framework/views
+/tests
+.git
+.env.example
+Start-Online.bat
+Dockerfile
+docker-compose.yml
+render.yaml
+cloudflared.exe

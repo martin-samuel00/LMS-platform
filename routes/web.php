@@ -16,6 +16,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Public discovery of teachers and classrooms
+Route::get('/students/teachers/search', [studentController::class, 'searchTeachers'])->name('students.teachers.search');
+
 // Guest Routes (accessible only when not logged in)
 Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
@@ -83,7 +86,6 @@ Route::middleware('auth')->group(function () {
     // --- Student Routes ---
     Route::prefix('students')->name('students.')->group(function () {
         Route::get('/', [studentController::class, 'index'])->name('index');
-        Route::get('/teachers/search', [studentController::class, 'searchTeachers'])->name('teachers.search');
         Route::post('/classroom/{classroom}/request-join', [studentController::class, 'requestJoinClassroom'])->name('classroom.request-join');
         Route::post('/join', [studentController::class, 'joinClassroom'])->name('classroom.join');
         Route::get('/classroom/{classroom}', [studentController::class, 'showClassroom'])->name('classroom');

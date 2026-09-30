@@ -181,6 +181,21 @@
             font-family: monospace;
         }
 
+        @media (max-width: 880px) {
+            body {
+                padding: 14px 8px;
+                justify-content: flex-start;
+            }
+            .cert-viewport-wrapper {
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                display: flex;
+                justify-content: flex-start;
+                padding-bottom: 24px;
+            }
+        }
+
         @media print {
             body { background: transparent; padding: 0; }
             .action-bar { display: none; }
@@ -194,7 +209,8 @@
         <button onclick="window.print()" class="btn-print">🖨️ Print / Save as PDF</button>
     </div>
 
-    <div class="certificate-container">
+    <div class="cert-viewport-wrapper">
+        <div class="certificate-container">
         <div class="inner-border">
             <div>
                 <div class="cert-header">Official Recognition</div>
@@ -233,6 +249,7 @@
                 Verification Code: {{ $certificate->certificate_code }} &bull; Classroom: {{ $certificate->classroom->code }}
             </div>
         </div>
+    </div>
     </div>
 </body>
 </html>

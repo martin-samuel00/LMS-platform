@@ -7,6 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/responsive-hub.css') }}">
+    <script src="{{ asset('js/responsive-hub.js') }}" defer></script>
     <script>
         // Apply saved theme preference on load immediately to avoid FOUC
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -511,6 +513,11 @@
             <span class="nav-brand-icon">🎓</span>
             <span>Classroom Hub</span>
         </a>
+        <button type="button" class="mobile-nav-toggle" aria-label="Toggle navigation">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
         <div class="navbar-actions">
             <!-- Theme Toggle -->
             <button onclick="toggleTheme()" class="btn-theme-toggle" title="Toggle Light/Dark Theme">

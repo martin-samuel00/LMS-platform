@@ -7,6 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/responsive-hub.css') }}">
+    <script src="{{ asset('js/responsive-hub.js') }}" defer></script>
     <script>
         // Apply saved theme preference immediately to avoid FOUC
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -675,6 +677,31 @@
                 text-align: center;
             }
         }
+
+        @media (max-width: 560px) {
+            .hero-search-card {
+                flex-direction: column !important;
+                gap: 8px !important;
+                padding: 8px !important;
+            }
+            .hero-search-card input {
+                width: 100% !important;
+                padding: 10px 14px !important;
+            }
+            .hero-search-card button {
+                width: 100% !important;
+                padding: 12px 16px !important;
+            }
+            .cta-buttons {
+                flex-direction: column !important;
+                width: 100% !important;
+                gap: 10px !important;
+            }
+            .btn-cta-student, .btn-cta-teacher {
+                width: 100% !important;
+                justify-content: center !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -684,6 +711,11 @@
             <span class="nav-brand-icon">🎓</span>
             <span>Classroom Hub</span>
         </a>
+        <button type="button" class="mobile-nav-toggle" aria-label="Toggle navigation">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
         <div class="nav-links">
             <a href="{{ route('students.teachers.search') }}" class="nav-link">Find Instructors</a>
             
