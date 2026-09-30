@@ -53,6 +53,6 @@ COPY docker/nginx/render-nginx.conf /etc/nginx/http.d/default.conf
 COPY docker/start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
 
-EXPOSE 10000
+EXPOSE 80 10000
 
 CMD ["/usr/local/bin/start.sh"]
