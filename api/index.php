@@ -4,6 +4,20 @@
  * Vercel Serverless Function Bridge for Laravel 12
  */
 
+// Normalize HTTPS server variables from Vercel edge reverse proxy
+if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+    $_SERVER['HTTPS'] = 'on';
+    $_SERVER['SERVER_PORT'] = '443';
+}
+if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+    $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_X_FORWARDED_HOST'];
+    $_SERVER['SERVER_NAME'] = $_SERVER['HTTP_X_FORWARDED_HOST'];
+}
+
+// Ensure session cookies are sent with Secure attribute on Vercel HTTPS
+putenv('SESSION_SECURE_COOKIE=true');
+$_ENV['SESSION_SECURE_COOKIE'] = 'true';
+
 // If DB_DATABASE is set to 'sys' (MySQL system catalog), correct it to 'test'
 $dbName = getenv('DB_DATABASE');
 if (!$dbName || $dbName === 'sys') {
