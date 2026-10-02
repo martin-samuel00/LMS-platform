@@ -27,16 +27,17 @@ class ProfileController extends Controller
             'username' => ['nullable', 'string', 'alpha_dash', 'min:3', 'max:30', Rule::unique('users')->ignore($user->id)],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'phone' => ['nullable', 'string', 'max:20'],
-            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,gif', 'max:2048'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,gif', 'max:10240'],
+            'avatar_data' => ['nullable', 'string'],
         ]);
 
-        if ($request->hasFile('avatar')) {
-            // Delete old avatar if custom
-            if ($user->avatar && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->avatar)) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
-            }
-            $avatarPath = $request->file('avatar')->store('avatars', 'public');
-            $user->avatar = $avatarPath;
+        if ($request->filled('avatar_data') && str_starts_with($request->avatar_data, 'data:image')) {
+            $user->avatar = $request->avatar_data;
+        } elseif ($request->hasFile('avatar')) {
+            $file = $request->file('avatar');
+            $mime = $file->getMimeType() ?: 'image/jpeg';
+            $data = base64_encode(file_get_contents($file->getRealPath()));
+            $user->avatar = "data:{$mime};base64,{$data}";
         }
 
         if ($request->filled('username')) {
@@ -52,7 +53,23 @@ class ProfileController extends Controller
             $user->email_verified_at = null;
         }
 
-        $user->save();
+        try {
+            $user->save();
+        } catch (\Throwable $e) {
+            // Auto-heal column if TiDB/MySQL still has avatar as VARCHAR(255)
+            if (str_contains($e->getMessage(), 'Data too long') || str_contains($e->getMessage(), '1406') || str_contains(strtolower($e->getMessage()), 'avatar')) {
+                try {
+                    \Illuminate\Support\Facades\DB::statement('ALTER TABLE users MODIFY avatar MEDIUMTEXT NULL');
+                    $user->save();
+                } catch (\Throwable $alterErr) {
+                    \Illuminate\Support\Facades\Log::error('Avatar column update error: ' . $alterErr->getMessage());
+                    return back()->with('error', 'Could not save profile picture: ' . $alterErr->getMessage());
+                }
+            } else {
+                \Illuminate\Support\Facades\Log::error('Profile update error: ' . $e->getMessage());
+                return back()->with('error', 'Failed to update profile: ' . $e->getMessage());
+            }
+        }
 
         if ($emailChanged) {
             try {

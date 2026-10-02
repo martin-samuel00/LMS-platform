@@ -469,6 +469,7 @@
                         📷
                     </label>
                     <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none;" onchange="handleAvatarChange(this)">
+                    <input type="hidden" name="avatar_data" id="avatarDataInput">
                 </div>
                 <div class="profile-hero-info">
                     <h1>{{ $user->name }}</h1>
@@ -599,13 +600,45 @@
 
         function handleAvatarChange(input) {
             if (input.files && input.files[0]) {
+                const file = input.files[0];
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const preview = document.getElementById('avatarPreview');
-                    if (preview) preview.src = e.target.result;
-                    if (window.HubToast) window.HubToast.info('Photo selected! Click "Save Profile Changes" below to apply.', 'Preview Ready');
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const size = 256;
+                        canvas.width = size;
+                        canvas.height = size;
+
+                        let sWidth = img.width;
+                        let sHeight = img.height;
+                        let sx = 0, sy = 0;
+                        if (sWidth > sHeight) {
+                            sx = (sWidth - sHeight) / 2;
+                            sWidth = sHeight;
+                        } else if (sHeight > sWidth) {
+                            sy = (sHeight - sWidth) / 2;
+                            sHeight = sWidth;
+                        }
+
+                        ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, size, size);
+                        const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+                        const preview = document.getElementById('avatarPreview');
+                        if (preview) preview.src = optimizedDataUrl;
+
+                        const hiddenInput = document.getElementById('avatarDataInput');
+                        if (hiddenInput) hiddenInput.value = optimizedDataUrl;
+
+                        // Clear raw file input so the browser doesn't upload the large multi-megabyte original
+                        input.value = '';
+
+                        if (window.HubToast) window.HubToast.success('Photo ready! Click "Save Profile Changes" below to apply.', 'Avatar Ready');
+                    };
+                    img.src = e.target.result;
                 };
-                reader.readAsDataURL(input.files[0]);
+                reader.readAsDataURL(file);
             }
         }
 

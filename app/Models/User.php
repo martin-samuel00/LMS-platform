@@ -33,6 +33,9 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getAvatarUrlAttribute(): string
     {
         if ($this->avatar) {
+            if (str_starts_with($this->avatar, 'data:') || filter_var($this->avatar, FILTER_VALIDATE_URL)) {
+                return $this->avatar;
+            }
             return asset('storage/' . $this->avatar);
         }
         $bg = substr(md5($this->name), 0, 6);

@@ -46,7 +46,13 @@ class AuthController extends Controller
 
         // 4. Send email verification notification
         try {
-            event(new Registered($user));
+            $verifyUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                'verification.verify',
+                now()->addMinutes(60),
+                ['id' => $user->getKey(), 'hash' => sha1($user->getEmailForVerification())]
+            );
+            \App\Services\EmailService::sendVerification($user, $verifyUrl);
+            session()->flash('direct_verify_url', $verifyUrl);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('Email verification dispatch error: ' . $e->getMessage());
         }

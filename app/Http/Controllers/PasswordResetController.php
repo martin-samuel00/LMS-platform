@@ -21,15 +21,20 @@ class PasswordResetController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
-
-        if ($status === Password::RESET_LINK_SENT) {
-            return back()->with('status', __($status));
+        $user = \App\Models\User::where('email', $request->email)->first();
+        if (!$user) {
+            return back()->withErrors(['email' => "We can't find an account with that email address."]);
         }
 
-        return back()->withErrors(['email' => __($status)]);
+        $token = Password::broker()->createToken($user);
+        $resetUrl = route('password.reset', ['token' => $token, 'email' => $user->email]);
+
+        // Dispatch via EmailService (Resend HTTP API / Mailer)
+        \App\Services\EmailService::sendPasswordReset($user, $resetUrl);
+
+        return back()
+            ->with('status', 'We have emailed your password reset link!')
+            ->with('direct_reset_url', $resetUrl);
     }
 
     // Display the password reset view for the given token

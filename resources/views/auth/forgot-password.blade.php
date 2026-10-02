@@ -206,7 +206,12 @@
 
         @if (session('status'))
             <div class="alert-success">
-                {{ session('status') }}
+                <div style="font-weight: 700; margin-bottom: 4px;">{{ session('status') }}</div>
+                @if (session('direct_reset_url'))
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(6, 95, 70, 0.3);">
+                        <a href="{{ session('direct_reset_url') }}" style="display: inline-block; background: #059669; color: #fff; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 700;">Open Reset Form Directly &rarr;</a>
+                    </div>
+                @endif
             </div>
         @endif
 

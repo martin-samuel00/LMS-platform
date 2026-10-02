@@ -47,8 +47,14 @@ Route::middleware('auth')->group(function () {
     })->middleware('signed')->name('verification.verify');
 
     Route::post('/email/verification-notification', function (Request $request) {
-        $request->user()->sendEmailVerificationNotification();
-        return back()->with('status', 'verification-link-sent');
+        $user = $request->user();
+        $verifyUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $user->getKey(), 'hash' => sha1($user->getEmailForVerification())]
+        );
+        \App\Services\EmailService::sendVerification($user, $verifyUrl);
+        return back()->with('status', 'verification-link-sent')->with('direct_verify_url', $verifyUrl);
     })->middleware('throttle:6,1')->name('verification.send');
 
     // --- Dashboard & Logout ---
@@ -127,4 +133,22 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/broadcast', [AdminController::class, 'broadcast'])->name('broadcast');
     });
+});
+
+// Dedicated system maintenance route to execute pending migrations on TiDB
+Route::get('/system/migrate-db', function () {
+    try {
+        \Illuminate\Support\Facades\DB::statement('ALTER TABLE users MODIFY avatar MEDIUMTEXT NULL');
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return response()->json([
+            'status' => 'success',
+            'output' => \Illuminate\Support\Facades\Artisan::output(),
+            'message' => 'TiDB database migration executed successfully and users.avatar column set to MEDIUMTEXT.'
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
 });

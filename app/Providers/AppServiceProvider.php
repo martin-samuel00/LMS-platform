@@ -23,15 +23,5 @@ class AppServiceProvider extends ServiceProvider
         if (config('app.env') === 'production' || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || (request() && str_contains(request()->getHost(), 'vercel.app'))) {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
-
-        // Auto-migrate serverless database on Vercel if needed
-        if (!file_exists('/tmp/.migrated_v2')) {
-            @touch('/tmp/.migrated_v2');
-            try {
-                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::error('Auto-migration error: ' . $e->getMessage());
-            }
-        }
     }
 }
