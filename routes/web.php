@@ -62,6 +62,10 @@ Route::middleware('auth')->group(function () {
     // --- 1-on-1 Direct Messaging ---
     Route::get('/messages', [DirectMessageController::class, 'index'])->name('messages.index');
     Route::post('/messages', [DirectMessageController::class, 'store'])->name('messages.store')->middleware('throttle:60,1');
+    Route::get('/messages/poll/{user}', [DirectMessageController::class, 'poll'])->name('messages.poll');
+
+    // --- Live Classroom Discussion Polling ---
+    Route::get('/classroom/{classroom}/messages', [studentController::class, 'getMessages'])->name('classroom.messages.poll');
 
     // --- Teacher Routes ---
     Route::prefix('teachers')->name('teachers.')->group(function () {

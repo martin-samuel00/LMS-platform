@@ -588,25 +588,40 @@
             });
         }
 
-        // Listen for Real-Time Incoming DMs via Laravel Echo & Reverb
+        // Listen for Real-Time Incoming DMs via Laravel Echo or Polling
         document.addEventListener('DOMContentLoaded', function() {
-            @if (Auth::check())
+            @if (Auth::check() && $selectedUser)
                 const currentUserId = {{ Auth::id() }};
-                const activeChatUserId = {{ $selectedUser ? $selectedUser->id : 'null' }};
+                const activeChatUserId = {{ $selectedUser->id }};
+                let lastDmId = {{ $messages->last()?->id ?? 0 }};
 
                 if (window.Echo) {
                     window.Echo.private(`user.${currentUserId}`)
                         .listen('.DirectMessageSent', function(e) {
                             if (activeChatUserId && e.message.sender_id === activeChatUserId) {
                                 appendMessageBubble(e.message.message, e.message.created_at, 'theirs');
-                            } else {
-                                // Increment badge or update contact preview
-                                const contactRow = document.querySelector(`a[href*="user_id=${e.message.sender_id}"]`);
-                                if (contactRow) {
-                                    contactRow.style.fontWeight = 'bold';
-                                }
                             }
                         });
+                } else {
+                    // Smooth polling fallback (every 3.5s) for live chat
+                    setInterval(async function() {
+                        try {
+                            const res = await fetch(`/messages/poll/${activeChatUserId}?after=${lastDmId}`, {
+                                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                            });
+                            if (res.ok) {
+                                const data = await res.json();
+                                if (data.messages && data.messages.length > 0) {
+                                    data.messages.forEach(msg => {
+                                        if (!msg.is_mine) {
+                                            appendMessageBubble(msg.message, msg.time || msg.created_at, 'theirs');
+                                        }
+                                        if (msg.id > lastDmId) lastDmId = msg.id;
+                                    });
+                                }
+                            }
+                        } catch (e) {}
+                    }, 3500);
                 }
             @endif
         });

@@ -963,19 +963,23 @@
                                                     <p style="font-size: 13.5px; color: var(--text-primary); margin: 8px 0; background: var(--box-bg); padding: 8px 12px; border-radius: 6px; line-height: 1.4;">{{ $sub->content }}</p>
                                                     
                                                     @if ($sub->file_path)
-                                                        <div style="margin-bottom: 8px;">
+                                                        <div style="margin-bottom: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                                            <button type="button" class="btn-preview-sm" onclick="openPreviewModal('{{ asset('storage/' . $sub->file_path) }}', '{{ addslashes($sub->user->name . ' - ' . ($sub->file_name ?? 'Submission')) }}', '{{ pathinfo($sub->file_path, PATHINFO_EXTENSION) }}')">
+                                                                👁️ Preview Submission
+                                                            </button>
                                                             <a href="{{ asset('storage/' . $sub->file_path) }}" download class="btn-download-sm">
-                                                                📥 Download Deliverable ({{ $sub->file_name ?? 'Attachment' }})
+                                                                📥 Download ({{ $sub->file_name ?? 'Attachment' }})
                                                             </a>
                                                         </div>
                                                     @endif
                                                     
-                                                    <!-- Grade Form -->
-                                                    <form action="{{ route('teachers.submission.grade', $sub) }}" method="POST" style="display: flex; gap: 8px; align-items: center; margin-top: 8px;">
+                                                    <!-- Grade Form with Quick AJAX Save -->
+                                                    <form action="{{ route('teachers.submission.grade', $sub) }}" method="POST" onsubmit="submitQuickGrade(event, this)" style="display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap;">
                                                         @csrf
                                                         <input type="number" name="grade" value="{{ $sub->grade }}" placeholder="Grade /{{ $assignment->points }}" max="{{ $assignment->points }}" min="0" required class="input-text" style="width: 100px; padding: 6px 8px; font-size: 12.5px;">
-                                                        <input type="text" name="feedback" value="{{ $sub->feedback }}" placeholder="Instructor feedback..." class="input-text" style="flex: 1; padding: 6px 10px; font-size: 12.5px;">
+                                                        <input type="text" name="feedback" value="{{ $sub->feedback }}" placeholder="Instructor feedback..." class="input-text" style="flex: 1; min-width: 160px; padding: 6px 10px; font-size: 12.5px;">
                                                         <button type="submit" class="btn-primary-sm" style="padding: 6px 14px; font-size: 12.5px;">Save Grade</button>
+                                                        <span class="grade-status-badge" style="display: none; font-size: 12px; font-weight: 700; color: #10b981;">✅ Saved</span>
                                                     </form>
                                                 </div>
                                             @endforeach
@@ -1293,10 +1297,12 @@
             });
         }
 
-        // Listen for Real-Time Messages on the Classroom Channel
+        // Listen for Real-Time Messages on the Classroom Channel or Poll
         document.addEventListener('DOMContentLoaded', function() {
             const chatBox = document.querySelector('.chat-box');
             if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+
+            let lastMsgId = {{ $classroom->messages->last()?->id ?? 0 }};
 
             if (window.Echo) {
                 const currentUserId = {{ Auth::id() }};
@@ -1306,6 +1312,26 @@
                             appendChatMessage(e.message.user_name, e.message.user_role, e.message.created_at, e.message.message, false);
                         }
                     });
+            } else {
+                // Smooth polling fallback (every 3.5s) for serverless environments
+                setInterval(async function() {
+                    try {
+                        const res = await fetch(`{{ route('classroom.messages.poll', $classroom) }}?after=${lastMsgId}`, {
+                            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data.messages && data.messages.length > 0) {
+                                data.messages.forEach(msg => {
+                                    if (msg.user_id !== {{ Auth::id() }}) {
+                                        appendChatMessage(msg.user_name, msg.user_role, msg.created_at, msg.message, false);
+                                    }
+                                    if (msg.id > lastMsgId) lastMsgId = msg.id;
+                                });
+                            }
+                        }
+                    } catch (e) {}
+                }, 3500);
             }
         });
 
@@ -1369,6 +1395,43 @@
             if (modal) {
                 modal.style.display = 'none';
                 bodyEl.innerHTML = '';
+            }
+        }
+
+        async function submitQuickGrade(e, form) {
+            e.preventDefault();
+            const btn = form.querySelector('button[type="submit"]');
+            const badge = form.querySelector('.grade-status-badge');
+            const origText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+            try {
+                const formData = new FormData(form);
+                const res = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    if (window.HubToast) {
+                        window.HubToast.success(data.message || 'Grade saved successfully!');
+                    }
+                    if (badge) {
+                        badge.style.display = 'inline-block';
+                        setTimeout(() => badge.style.display = 'none', 3000);
+                    }
+                } else {
+                    if (window.HubToast) window.HubToast.error(data.message || 'Error saving grade');
+                }
+            } catch (err) {
+                if (window.HubToast) window.HubToast.error('Network error saving grade');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = origText;
             }
         }
 

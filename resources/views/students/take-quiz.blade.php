@@ -251,41 +251,58 @@
     </nav>
 
     <div class="container">
+        <!-- Floating Live Quiz Timer & Question Navigator -->
+        <div class="quiz-sticky-bar">
+            <div class="quiz-timer-badge" id="quizTimerBadge">
+                <span>⏱️</span>
+                <span id="quizTimerText">15:00</span>
+            </div>
+            <div class="quiz-progress-track" title="Quiz Completion Progress">
+                <div class="quiz-progress-fill" id="quizProgressFill"></div>
+            </div>
+            <div class="quiz-questions-nav">
+                @foreach ($quiz->questions as $index => $q)
+                    <a href="#question-{{ $q->id }}" class="quiz-nav-dot" id="nav-dot-{{ $q->id }}" title="Go to Question {{ $index + 1 }}">{{ $index + 1 }}</a>
+                @endforeach
+            </div>
+        </div>
+
         <div class="card">
             <div class="quiz-header">
                 <h1>{{ $quiz->title }}</h1>
                 <div class="meta-pills">
                     <span class="meta-pill">Pass Score: {{ $quiz->pass_percentage }}%</span>
                     <span class="meta-pill">Total Questions: {{ $quiz->questions->count() }}</span>
+                    <span class="meta-pill" id="answeredCountBadge">0 / {{ $quiz->questions->count() }} Answered</span>
                 </div>
                 @if ($quiz->description)
                     <p style="margin-top: 12px;">{{ $quiz->description }}</p>
                 @endif
             </div>
 
-            <form action="{{ route('students.quiz.submit', $quiz) }}" method="POST">
+            <form id="quizForm" action="{{ route('students.quiz.submit', $quiz) }}" method="POST">
                 @csrf
 
                 @foreach ($quiz->questions as $index => $q)
-                    <div class="question-card">
+                    <div class="question-card" id="question-{{ $q->id }}">
                         <div class="q-number">Question {{ $index + 1 }} of {{ $quiz->questions->count() }}</div>
                         <div class="q-text">{{ $q->question_text }}</div>
 
                         <div class="options-list">
                             <label class="option-label">
-                                <input type="radio" name="answers[{{ $q->id }}]" value="a" required>
+                                <input type="radio" name="answers[{{ $q->id }}]" value="a" onchange="markAnswered({{ $q->id }})">
                                 <span><strong>A.</strong> {{ $q->option_a }}</span>
                             </label>
                             <label class="option-label">
-                                <input type="radio" name="answers[{{ $q->id }}]" value="b">
+                                <input type="radio" name="answers[{{ $q->id }}]" value="b" onchange="markAnswered({{ $q->id }})">
                                 <span><strong>B.</strong> {{ $q->option_b }}</span>
                             </label>
                             <label class="option-label">
-                                <input type="radio" name="answers[{{ $q->id }}]" value="c">
+                                <input type="radio" name="answers[{{ $q->id }}]" value="c" onchange="markAnswered({{ $q->id }})">
                                 <span><strong>C.</strong> {{ $q->option_c }}</span>
                             </label>
                             <label class="option-label">
-                                <input type="radio" name="answers[{{ $q->id }}]" value="d">
+                                <input type="radio" name="answers[{{ $q->id }}]" value="d" onchange="markAnswered({{ $q->id }})">
                                 <span><strong>D.</strong> {{ $q->option_d }}</span>
                             </label>
                         </div>
@@ -298,6 +315,72 @@
     </div>
 
     <script>
+        // Quiz Countdown Timer & Question Tracker
+        const totalQuestions = {{ $quiz->questions->count() }};
+        const answeredMap = {};
+
+        function markAnswered(qId) {
+            answeredMap[qId] = true;
+            const dot = document.getElementById('nav-dot-' + qId);
+            if (dot) dot.classList.add('answered');
+
+            const answeredCount = Object.keys(answeredMap).length;
+            const percent = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+            const fill = document.getElementById('quizProgressFill');
+            if (fill) fill.style.width = percent + '%';
+
+            const badge = document.getElementById('answeredCountBadge');
+            if (badge) badge.textContent = `${answeredCount} / ${totalQuestions} Answered`;
+        }
+
+        // Timer Configuration (2 minutes per question, minimum 5 minutes)
+        const quizMinutes = Math.max(5, totalQuestions * 2);
+        let secondsLeft = quizMinutes * 60;
+        const timerText = document.getElementById('quizTimerText');
+        const timerBadge = document.getElementById('quizTimerBadge');
+        const quizForm = document.getElementById('quizForm');
+        let autoSubmitted = false;
+
+        function updateTimer() {
+            if (secondsLeft <= 0) {
+                if (!autoSubmitted) {
+                    autoSubmitted = true;
+                    if (window.HubToast) {
+                        window.HubToast.warning('Time is up! Submitting your answers automatically...', 'Time Expired');
+                    }
+                    setTimeout(() => quizForm.submit(), 1200);
+                }
+                return;
+            }
+
+            secondsLeft--;
+            const mins = Math.floor(secondsLeft / 60);
+            const secs = secondsLeft % 60;
+            if (timerText) {
+                timerText.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
+
+            if (secondsLeft <= 60 && timerBadge && !timerBadge.classList.contains('timer-warning')) {
+                timerBadge.classList.add('timer-warning');
+                if (window.HubToast) {
+                    window.HubToast.warning('Less than 1 minute remaining!', 'Hurry Up');
+                }
+            }
+        }
+
+        setInterval(updateTimer, 1000);
+
+        // Confirmation on manual submission if questions remain unanswered
+        quizForm.addEventListener('submit', function(e) {
+            const answeredCount = Object.keys(answeredMap).length;
+            if (answeredCount < totalQuestions && !autoSubmitted) {
+                const unanswered = totalQuestions - answeredCount;
+                if (!confirm(`You still have ${unanswered} unanswered question(s). Are you sure you want to submit now?`)) {
+                    e.preventDefault();
+                }
+            }
+        });
+
         function updateThemeButton() {
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             const icon = document.getElementById('theme-icon');

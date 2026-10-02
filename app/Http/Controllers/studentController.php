@@ -302,6 +302,35 @@ class studentController extends Controller
         return back()->with('success', 'Message posted to class chat!');
     }
 
+    // Fetch latest classroom messages for real-time polling fallback
+    public function getMessages(Request $request, Classroom $classroom)
+    {
+        $user = Auth::user();
+        $isEnrolled = $classroom->students()->where('user_id', $user->id)->exists();
+        if (!$isEnrolled && $classroom->teacher_id !== $user->id && !$user->isAdmin()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $afterId = (int) $request->query('after', 0);
+        $query = $classroom->messages()->with('user')->orderBy('id', 'asc');
+        if ($afterId > 0) {
+            $query->where('id', '>', $afterId);
+        }
+
+        $messages = $query->take(60)->get()->map(function ($msg) {
+            return [
+                'id' => $msg->id,
+                'user_id' => $msg->user_id,
+                'user_name' => $msg->user->name ?? 'User',
+                'user_role' => $msg->user->role ?? 'student',
+                'message' => $msg->message,
+                'created_at' => $msg->created_at ? $msg->created_at->format('M d, g:i A') : 'Just now',
+            ];
+        });
+
+        return response()->json(['messages' => $messages]);
+    }
+
     // Take a quiz
     public function takeQuiz(Quiz $quiz)
     {

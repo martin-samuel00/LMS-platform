@@ -339,6 +339,16 @@ class TeacherController extends Controller
             'grade'
         );
 
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => "Submission for {$submission->user->name} graded successfully!",
+                'grade' => $submission->grade,
+                'feedback' => $submission->feedback,
+                'submission_status' => 'graded'
+            ]);
+        }
+
         return back()->with('success', "Submission for {$submission->user->name} graded successfully!");
     }
 

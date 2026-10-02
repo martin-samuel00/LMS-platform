@@ -109,4 +109,41 @@ class DirectMessageController extends Controller
         return redirect()->route('messages.index', ['user_id' => $receiver->id])
             ->with('success', 'Message sent!');
     }
+
+    // Poll new messages between current user and target user
+    public function poll(Request $request, User $user)
+    {
+        $currentUser = Auth::user();
+        $afterId = (int) $request->query('after', 0);
+
+        $query = DirectMessage::where(function ($q) use ($currentUser, $user) {
+            $q->where('sender_id', $currentUser->id)->where('receiver_id', $user->id);
+        })->orWhere(function ($q) use ($currentUser, $user) {
+            $q->where('sender_id', $user->id)->where('receiver_id', $currentUser->id);
+        });
+
+        if ($afterId > 0) {
+            $query->where('id', '>', $afterId);
+        }
+
+        $newMessages = $query->orderBy('id', 'asc')->get();
+
+        // Mark incoming messages as read
+        DirectMessage::where('sender_id', $user->id)
+            ->where('receiver_id', $currentUser->id)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        return response()->json([
+            'messages' => $newMessages->map(function ($dm) use ($currentUser) {
+                return [
+                    'id' => $dm->id,
+                    'sender_id' => $dm->sender_id,
+                    'is_mine' => $dm->sender_id === $currentUser->id,
+                    'message' => $dm->message,
+                    'created_at' => $dm->created_at ? $dm->created_at->format('M d, g:i A') : 'Just now',
+                ];
+            })
+        ]);
+    }
 }

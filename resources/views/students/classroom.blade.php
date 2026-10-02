@@ -1151,10 +1151,12 @@
             });
         }
 
-        // Real-Time Classroom Discussion Listener via Echo
+        // Real-Time Classroom Discussion Listener via Echo or Polling Fallback
         document.addEventListener('DOMContentLoaded', function() {
             const chatBox = document.querySelector('.chat-box');
             if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+
+            let lastMsgId = {{ $classroom->messages->last()?->id ?? 0 }};
 
             if (window.Echo) {
                 const currentUserId = {{ Auth::id() }};
@@ -1164,6 +1166,26 @@
                             appendChatMessage(e.message.user_name, e.message.user_role, e.message.created_at, e.message.message, false);
                         }
                     });
+            } else {
+                // Smooth polling fallback (every 3.5s) for serverless environments
+                setInterval(async function() {
+                    try {
+                        const res = await fetch(`{{ route('classroom.messages.poll', $classroom) }}?after=${lastMsgId}`, {
+                            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data.messages && data.messages.length > 0) {
+                                data.messages.forEach(msg => {
+                                    if (msg.user_id !== {{ Auth::id() }}) {
+                                        appendChatMessage(msg.user_name, msg.user_role, msg.created_at, msg.message, false);
+                                    }
+                                    if (msg.id > lastMsgId) lastMsgId = msg.id;
+                                });
+                            }
+                        }
+                    } catch (e) {}
+                }, 3500);
             }
         });
 

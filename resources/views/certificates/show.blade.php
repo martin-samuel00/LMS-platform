@@ -206,12 +206,13 @@
 <body>
     <div class="action-bar">
         <a href="javascript:history.back()" class="btn-back">&larr; Go Back</a>
+        <button type="button" onclick="navigator.clipboard.writeText('{{ route('certificates.show', $certificate) }}'); if (window.HubToast) window.HubToast.success('Verification link copied to clipboard!'); else alert('Link copied to clipboard!');" class="btn-print" style="background: #3b82f6; color: #ffffff;">🔗 Copy Share Link</button>
         <button onclick="window.print()" class="btn-print">🖨️ Print / Save as PDF</button>
     </div>
 
     <div class="cert-viewport-wrapper">
         <div class="certificate-container">
-        <div class="inner-border">
+        <div class="inner-border" style="position: relative;">
             <div>
                 <div class="cert-header">Official Recognition</div>
                 <div class="cert-title">{{ $certificate->title }}</div>
@@ -247,6 +248,12 @@
 
             <div class="cert-code">
                 Verification Code: {{ $certificate->certificate_code }} &bull; Classroom: {{ $certificate->classroom->code }}
+            </div>
+
+            <!-- Dynamic Verification QR Code -->
+            <div class="cert-qr-wrap" style="position: absolute; bottom: 18px; right: 24px; display: flex; flex-direction: column; align-items: center; gap: 3px;">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data={{ urlencode(route('certificates.show', $certificate)) }}" alt="QR Verification" style="width: 50px; height: 50px; border: 1px solid #ca8a04; border-radius: 4px; padding: 2px; background: #ffffff;">
+                <span style="font-size: 8px; color: #854d0e; font-weight: 700; letter-spacing: 0.5px;">VERIFY</span>
             </div>
         </div>
     </div>
