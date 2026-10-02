@@ -25,12 +25,10 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // Auto-migrate serverless database on Vercel if needed
-        if (!file_exists('/tmp/.migrated')) {
+        if (!file_exists('/tmp/.migrated_v2')) {
             try {
-                if (!\Illuminate\Support\Facades\Schema::hasTable('classrooms')) {
-                    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-                }
-                @touch('/tmp/.migrated');
+                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+                @touch('/tmp/.migrated_v2');
             } catch (\Throwable $e) {
                 \Illuminate\Support\Facades\Log::error('Auto-migration error: ' . $e->getMessage());
             }

@@ -26,6 +26,12 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
+
+    // Password Recovery Routes
+    Route::get('/forgot-password', [\App\Http\Controllers\PasswordResetController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('/forgot-password', [\App\Http\Controllers\PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('/reset-password/{token}', [\App\Http\Controllers\PasswordResetController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [\App\Http\Controllers\PasswordResetController::class, 'reset'])->name('password.update');
 });
 
 // Authenticated Routes (accessible only when logged in)
@@ -67,8 +73,8 @@ Route::middleware('auth')->group(function () {
     // --- Live Classroom Discussion Polling ---
     Route::get('/classroom/{classroom}/messages', [studentController::class, 'getMessages'])->name('classroom.messages.poll');
 
-    // --- Teacher Routes ---
-    Route::prefix('teachers')->name('teachers.')->group(function () {
+    // --- Teacher Routes (Protected for Teachers & Admins Only) ---
+    Route::prefix('teachers')->name('teachers.')->middleware('teacher')->group(function () {
         Route::get('/', [TeacherController::class, 'index'])->name('index');
         Route::post('/classroom', [TeacherController::class, 'storeClassroom'])->name('classroom.store');
         Route::get('/classroom/{classroom}', [TeacherController::class, 'showClassroom'])->name('classroom');
@@ -87,8 +93,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/classroom/{classroom}/certificate', [TeacherController::class, 'issueCertificate'])->name('certificate.issue');
     });
 
-    // --- Student Routes ---
-    Route::prefix('students')->name('students.')->group(function () {
+    // --- Student Routes (Protected for Students & Admins Only) ---
+    Route::prefix('students')->name('students.')->middleware('student')->group(function () {
         Route::get('/', [studentController::class, 'index'])->name('index');
         Route::post('/classroom/{classroom}/request-join', [studentController::class, 'requestJoinClassroom'])->name('classroom.request-join');
         Route::post('/join', [studentController::class, 'joinClassroom'])->name('classroom.join');

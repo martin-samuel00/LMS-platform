@@ -324,6 +324,30 @@
                 @enderror
             </div>
 
+            <!-- Username -->
+            <div class="form-group">
+                <label for="username">Unique Username <span style="font-weight: normal; font-size: 11.5px; color: var(--text-secondary);">(Cannot be changed later)</span></label>
+                <div style="position: relative;">
+                    <span style="position: absolute; left: 14px; top: 12px; color: var(--text-secondary); font-weight: 700;">@</span>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        value="{{ old('username') }}" 
+                        class="{{ $errors->has('username') ? 'is-invalid' : '' }}" 
+                        placeholder="janedoe" 
+                        style="padding-left: 34px;"
+                        required 
+                        minlength="3"
+                        maxlength="30"
+                        pattern="[A-Za-z0-9_\-]+"
+                    >
+                </div>
+                @error('username')
+                    <div class="error-message">{{ $message }}</div>
+                @enderror
+            </div>
+
             <!-- Email -->
             <div class="form-group">
                 <label for="email">Email Address</label>
@@ -355,15 +379,18 @@
 
             <!-- Password -->
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password">Password <span style="font-weight: normal; font-size: 11.5px; color: var(--text-secondary);">(Min 8 characters)</span></label>
                 <input 
                     type="password" 
                     id="password" 
                     name="password" 
                     class="{{ $errors->has('password') ? 'is-invalid' : '' }}" 
-                    placeholder="Minimum 8 characters" 
+                    placeholder="••••••••••••" 
                     required
+                    minlength="8"
+                    oninput="checkPasswordStrength(this.value)"
                 >
+                <div id="password-strength-bar" style="height: 4px; border-radius: 2px; margin-top: 6px; background: #e2e8f0; transition: all 0.3s; width: 0%;"></div>
                 @error('password')
                     <div class="error-message">{{ $message }}</div>
                 @enderror
@@ -422,6 +449,33 @@
             document.documentElement.setAttribute('data-theme', next);
             localStorage.setItem('theme', next);
             updateThemeButton();
+        }
+
+        function checkPasswordStrength(val) {
+            const bar = document.getElementById('password-strength-bar');
+            if (!bar) return;
+            let score = 0;
+            if (val.length >= 8) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            if (val.length === 0) {
+                bar.style.width = '0%';
+                bar.style.background = '#e2e8f0';
+            } else if (score <= 1) {
+                bar.style.width = '25%';
+                bar.style.background = '#ef4444';
+            } else if (score === 2) {
+                bar.style.width = '50%';
+                bar.style.background = '#f59e0b';
+            } else if (score === 3) {
+                bar.style.width = '75%';
+                bar.style.background = '#3b82f6';
+            } else {
+                bar.style.width = '100%';
+                bar.style.background = '#10b981';
+            }
         }
 
         updateThemeButton();

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - Classroom Hub</title>
+    <title>Forgot Password - Classroom Hub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -64,57 +64,6 @@
             overflow-x: hidden;
         }
 
-        /* Ambient glow backdrop */
-        .ambient-glow {
-            position: absolute;
-            width: 500px;
-            height: 500px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
-            top: 20%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .top-nav {
-            width: 100%;
-            max-width: 440px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .nav-back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 13.5px;
-            font-weight: 600;
-            transition: color 0.15s;
-        }
-
-        .nav-back-link:hover {
-            color: var(--highlight);
-        }
-
-        .btn-theme-toggle {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
         .auth-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -148,20 +97,20 @@
 
         .header {
             text-align: center;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
         }
 
         .header h1 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 800;
-            letter-spacing: -0.5px;
             color: var(--text-primary);
             margin-bottom: 6px;
         }
 
         .header p {
-            font-size: 14px;
+            font-size: 13.5px;
             color: var(--text-secondary);
+            line-height: 1.5;
         }
 
         .alert-success {
@@ -204,39 +153,6 @@
             box-shadow: 0 0 0 3px var(--accent-glow);
         }
 
-        .form-group input.is-invalid {
-            border-color: #ef4444;
-        }
-
-        .error-message {
-            color: #ef4444;
-            font-size: 12px;
-            font-weight: 600;
-            margin-top: 6px;
-        }
-
-        .remember-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 24px;
-        }
-
-        .remember-row input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            accent-color: var(--highlight);
-            cursor: pointer;
-        }
-
-        .remember-row label {
-            font-size: 13px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            user-select: none;
-            font-weight: 500;
-        }
-
         .btn-submit {
             width: 100%;
             padding: 13px;
@@ -254,11 +170,6 @@
         .btn-submit:hover {
             background: var(--highlight-hover);
             transform: translateY(-1px);
-            box-shadow: 0 6px 18px rgba(79, 70, 229, 0.4);
-        }
-
-        .btn-submit:active {
-            transform: translateY(0);
         }
 
         .footer-link {
@@ -274,53 +185,43 @@
             text-decoration: none;
         }
 
-        .footer-link a:hover {
-            text-decoration: underline;
+        .error-message {
+            color: #ef4444;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 6px;
         }
     </style>
 </head>
 <body>
-    <div class="ambient-glow"></div>
-
-    <div class="top-nav">
-        <a href="{{ url('/') }}" class="nav-back-link">
-            <span>&larr;</span>
-            <span>Back to Home</span>
-        </a>
-        <button type="button" onclick="toggleTheme()" class="btn-theme-toggle" title="Toggle Light/Dark Theme">
-            <span id="theme-icon">🌙</span>
-        </button>
-    </div>
-
     <div class="auth-card">
         <div class="brand-icon-wrap">
-            <div class="brand-badge">🎓</div>
+            <div class="brand-badge">🔑</div>
         </div>
 
         <div class="header">
-            <h1>Welcome Back</h1>
-            <p>Sign in with your email or username</p>
+            <h1>Reset Your Password</h1>
+            <p>Enter your account email address and we'll send you a secure password reset link.</p>
         </div>
 
-        @if (session('success'))
+        @if (session('status'))
             <div class="alert-success">
-                {{ session('success') }}
+                {{ session('status') }}
             </div>
         @endif
 
-        <form action="{{ route('login') }}" method="POST">
+        <form action="{{ route('password.email') }}" method="POST">
             @csrf
 
-            <!-- Email or Username -->
             <div class="form-group">
-                <label for="email">Email Address or Username</label>
+                <label for="email">Account Email Address</label>
                 <input 
-                    type="text" 
+                    type="email" 
                     id="email" 
                     name="email" 
                     value="{{ old('email') }}" 
                     class="{{ $errors->has('email') ? 'is-invalid' : '' }}" 
-                    placeholder="john@example.com or admin" 
+                    placeholder="you@example.com" 
                     required 
                     autofocus
                 >
@@ -329,57 +230,12 @@
                 @enderror
             </div>
 
-            <!-- Password -->
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    name="password" 
-                    class="{{ $errors->has('password') ? 'is-invalid' : '' }}" 
-                    placeholder="••••••••••••" 
-                    required
-                >
-                @error('password')
-                    <div class="error-message">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <!-- Remember Me & Forgot Password -->
-            <div class="remember-row" style="justify-content: space-between; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <input type="checkbox" id="remember" name="remember">
-                    <label for="remember">Remember me</label>
-                </div>
-                <a href="{{ route('password.request') }}" style="font-size: 13px; color: var(--highlight); text-decoration: none; font-weight: 600;">Forgot password?</a>
-            </div>
-
-            <button type="submit" class="btn-submit">Sign In &rarr;</button>
+            <button type="submit" class="btn-submit">Send Reset Link &rarr;</button>
         </form>
 
         <div class="footer-link">
-            Don't have an account? <a href="{{ route('register') }}">Create an Account</a>
+            Remembered your password? <a href="{{ route('login') }}">Back to Sign In</a>
         </div>
     </div>
-
-    <script>
-        function updateThemeButton() {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const icon = document.getElementById('theme-icon');
-            if (icon) {
-                icon.textContent = isDark ? '☀️ Light' : '🌙 Dark';
-            }
-        }
-
-        function toggleTheme() {
-            const current = document.documentElement.getAttribute('data-theme') || 'light';
-            const next = current === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
-            updateThemeButton();
-        }
-
-        updateThemeButton();
-    </script>
 </body>
 </html>

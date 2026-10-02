@@ -22,11 +22,20 @@ class AuthController extends Controller
         // 1. Validate inputs
         $incomingFields = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'alpha_dash', 'min:3', 'max:30', 'unique:users,username'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['nullable', 'string', 'max:20'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role' => ['required', 'string', 'in:student,teacher'],
+        ], [
+            'username.unique' => 'This username is already taken. Please choose another one.',
+            'username.alpha_dash' => 'Username may only contain letters, numbers, dashes and underscores.',
+            'email.unique' => 'An account with this email address already exists.',
+            'password.min' => 'Password must be at least 8 characters long.',
+            'password.confirmed' => 'Password confirmation does not match.',
         ]);
+
+        $incomingFields['username'] = strtolower(trim($incomingFields['username']));
 
         // 2. Hash password and create user in database
         $incomingFields['password'] = Hash::make($incomingFields['password']);
@@ -36,10 +45,14 @@ class AuthController extends Controller
         Auth::login($user);
 
         // 4. Send email verification notification
-        event(new Registered($user));
+        try {
+            event(new Registered($user));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Email verification dispatch error: ' . $e->getMessage());
+        }
 
-        // 5. Redirect to email verification notice
-        return redirect()->route('verification.notice')->with('success', 'Account created! A verification link has been sent to your email.');
+        // 5. Redirect to email verification notice or dashboard
+        return redirect()->route('dashboard')->with('success', "Welcome to Classroom Hub, @{$user->username}!");
     }
 
     // Show login form
@@ -58,7 +71,13 @@ class AuthController extends Controller
         ]);
 
         $loginInput = trim($request->input('email'));
-        $fieldType = filter_var($loginInput, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
+        if (filter_var($loginInput, FILTER_VALIDATE_EMAIL)) {
+            $fieldType = 'email';
+        } elseif (User::where('username', $loginInput)->exists()) {
+            $fieldType = 'username';
+        } else {
+            $fieldType = 'name';
+        }
 
         $credentials = [
             $fieldType => $loginInput,

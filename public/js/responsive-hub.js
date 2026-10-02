@@ -127,3 +127,88 @@ window.HubToast = (function () {
     };
 })();
 
+// 3. Instant Snappy Navigation & Link Prefetching Engine
+(function () {
+    var progressBar = document.createElement('div');
+    progressBar.id = 'hub-nav-progress-bar';
+    document.body.appendChild(progressBar);
+
+    var progressTimer = null;
+    var currentProgress = 0;
+
+    function startProgress() {
+        if (progressTimer) clearInterval(progressTimer);
+        currentProgress = 15;
+        progressBar.style.width = currentProgress + '%';
+        progressBar.className = 'active';
+
+        progressTimer = setInterval(function () {
+            if (currentProgress < 75) {
+                currentProgress += Math.random() * 12;
+                progressBar.style.width = currentProgress + '%';
+            }
+        }, 120);
+    }
+
+    function completeProgress() {
+        if (progressTimer) clearInterval(progressTimer);
+        progressBar.className = 'active finishing';
+        setTimeout(function () {
+            progressBar.className = '';
+            progressBar.style.width = '0%';
+        }, 350);
+    }
+
+    // Prefetch cache map to avoid duplicate prefetch tags
+    var prefetched = {};
+
+    function prefetchUrl(url) {
+        if (!url || prefetched[url]) return;
+        prefetched[url] = true;
+        var link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = url;
+        document.head.appendChild(link);
+    }
+
+    // Listen for hover & touchstart on internal links to prefetch
+    document.addEventListener('mouseover', function (e) {
+        var a = e.target.closest('a');
+        if (!a || !a.href) return;
+        if (a.origin === window.location.origin && !a.href.includes('#') && !a.hasAttribute('download')) {
+            prefetchUrl(a.href);
+        }
+    });
+
+    document.addEventListener('touchstart', function (e) {
+        var a = e.target.closest('a');
+        if (!a || !a.href) return;
+        if (a.origin === window.location.origin && !a.href.includes('#') && !a.hasAttribute('download')) {
+            prefetchUrl(a.href);
+        }
+    }, { passive: true });
+
+    // Show instant progress on link click
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest('a');
+        if (!a || !a.href || a.target === '_blank' || a.hasAttribute('download')) return;
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        if (a.origin === window.location.origin && !a.href.includes('#') && a.href !== window.location.href) {
+            startProgress();
+        }
+    });
+
+    // Show instant progress on form submissions
+    document.addEventListener('submit', function (e) {
+        var form = e.target;
+        if (form && !form.target) {
+            startProgress();
+        }
+    });
+
+    window.addEventListener('pageshow', function () {
+        completeProgress();
+    });
+})();
+
+

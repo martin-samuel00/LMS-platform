@@ -452,34 +452,44 @@
             </div>
         @endif
 
-        <!-- Profile Hero Strip -->
-        <div class="profile-hero">
-            <div class="profile-avatar-large">
-                {{ substr($user->name, 0, 1) }}
-            </div>
-            <div class="profile-hero-info">
-                <h1>{{ $user->name }}</h1>
-                <p>{{ $user->email }} &bull; Member since {{ $user->created_at->format('M Y') }}</p>
-                <div class="role-badge">
-                    @if($user->isAdmin())
-                        🛡️ Administrator
-                    @elseif($user->role === 'teacher')
-                        👩‍🏫 Teacher
-                    @else
-                        👨‍🎓 Student
-                    @endif
+        <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PATCH')
+
+            <!-- Profile Hero Strip with Avatar Upload -->
+            <div class="profile-hero">
+                <div style="position: relative; display: inline-block;">
+                    <img 
+                        id="avatarPreview" 
+                        src="{{ $user->avatar_url }}" 
+                        alt="{{ $user->name }}" 
+                        style="width: 86px; height: 86px; border-radius: 50%; object-fit: cover; border: 3px solid var(--highlight); box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);"
+                    >
+                    <label for="avatarInput" style="position: absolute; bottom: 0; right: 0; background: var(--highlight); color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2);" title="Change Profile Picture">
+                        📷
+                    </label>
+                    <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none;" onchange="handleAvatarChange(this)">
+                </div>
+                <div class="profile-hero-info">
+                    <h1>{{ $user->name }}</h1>
+                    <p style="color: var(--highlight); font-weight: 700; margin-bottom: 2px;">{{ '@' . ($user->username ?? 'user' . $user->id) }}</p>
+                    <p>{{ $user->email }} &bull; Member since {{ $user->created_at->format('M Y') }}</p>
+                    <div class="role-badge">
+                        @if($user->isAdmin())
+                            🛡️ Administrator
+                        @elseif($user->role === 'teacher')
+                            👩‍🏫 Teacher
+                        @else
+                            👨‍🎓 Student
+                        @endif
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 1. Profile Information Form -->
-        <div class="card">
-            <h2>Personal Information</h2>
-            <p class="card-desc">Update your display name, primary email address, and security phone number.</p>
-
-            <form action="{{ route('profile.update') }}" method="POST">
-                @csrf
-                @method('PATCH')
+            <!-- 1. Profile Information Form -->
+            <div class="card">
+                <h2>Personal Information</h2>
+                <p class="card-desc">Update your profile picture, display name, unique username, and contact details.</p>
 
                 <div class="form-grid">
                     <div class="form-group">
@@ -488,8 +498,21 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="username">Username (@handle)</label>
+                        <div style="position: relative;">
+                            <span style="position: absolute; left: 12px; top: 12px; color: var(--text-secondary); font-weight: 700;">@</span>
+                            <input type="text" id="username" name="username" value="{{ old('username', $user->username) }}" style="padding-left: 28px;" placeholder="unique_username">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         <label for="role">Account Role</label>
                         <input type="text" value="{{ ucfirst($user->role) }}" disabled style="opacity: 0.75; cursor: not-allowed;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number (Optional)</label>
+                        <input type="text" id="phone" name="phone" value="{{ old('phone', $user->phone) }}" placeholder="+1 (555) 000-0000">
                     </div>
 
                     <div class="form-group full">
@@ -504,16 +527,11 @@
                             @endif
                         </div>
                     </div>
-
-                    <div class="form-group full">
-                        <label for="phone">Phone Number (Security & Notifications)</label>
-                        <input type="text" id="phone" name="phone" value="{{ old('phone', $user->phone) }}" placeholder="+1 (555) 000-0000">
-                    </div>
                 </div>
 
                 <button type="submit" class="btn-save">Save Profile Changes</button>
-            </form>
-        </div>
+            </div>
+        </form>
 
         <!-- 2. Change Password Form -->
         <div class="card">
@@ -577,6 +595,18 @@
 
         function setTheme(theme) {
             updateThemeUI(theme);
+        }
+
+        function handleAvatarChange(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('avatarPreview');
+                    if (preview) preview.src = e.target.result;
+                    if (window.HubToast) window.HubToast.info('Photo selected! Click "Save Profile Changes" below to apply.', 'Preview Ready');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
         }
 
         // Initialize state on page load

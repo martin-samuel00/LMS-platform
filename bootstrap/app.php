@@ -15,6 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'teacher' => \App\Http\Middleware\EnsureUserIsTeacher::class,
+            'student' => \App\Http\Middleware\EnsureUserIsStudent::class,
         ]);
         $middleware->appendToGroup('web', [
             \App\Http\Middleware\CheckBannedMiddleware::class,

@@ -347,6 +347,7 @@ class studentController extends Controller
     }
 
     // Submit quiz answers
+    // Submit quiz answers with multi-format auto-grading
     public function submitQuiz(Request $request, Quiz $quiz)
     {
         $user = Auth::user();
@@ -357,31 +358,80 @@ class studentController extends Controller
         }
 
         $questions = $quiz->questions;
-        $total = $questions->count();
-        $score = 0;
+        $totalQuestionsCount = $questions->count();
+        $totalPossiblePoints = 0;
+        $earnedPoints = 0;
 
         $answers = $request->input('answers', []);
 
         foreach ($questions as $q) {
-            if (isset($answers[$q->id]) && $answers[$q->id] === $q->correct_option) {
-                $score++;
+            $qPoints = $q->points > 0 ? $q->points : 1;
+            $totalPossiblePoints += $qPoints;
+            $submitted = $answers[$q->id] ?? null;
+
+            if ($submitted === null || $submitted === '') {
+                continue;
+            }
+
+            $type = $q->question_type ?? 'choose';
+
+            if ($type === 'choose' || $type === 'true_false') {
+                if (is_string($submitted) && strtolower(trim($submitted)) === strtolower(trim($q->correct_option))) {
+                    $earnedPoints += $qPoints;
+                }
+            } elseif ($type === 'complete' || $type === 'scientific_term') {
+                if (is_string($submitted)) {
+                    $studentText = trim(mb_strtolower($submitted));
+                    $expectedText = trim(mb_strtolower($q->correct_answer_text ?? ''));
+                    // Check direct match or acceptable variation
+                    if ($studentText !== '' && ($studentText === $expectedText || str_contains($expectedText, $studentText) && strlen($studentText) >= 3)) {
+                        $earnedPoints += $qPoints;
+                    }
+                }
+            } elseif ($type === 'match') {
+                if (is_array($submitted) && !empty($q->matching_pairs)) {
+                    $pairList = is_array($q->matching_pairs) ? $q->matching_pairs : json_decode($q->matching_pairs, true);
+                    if (!empty($pairList)) {
+                        $matchCount = 0;
+                        $totalPairs = count($pairList);
+                        foreach ($pairList as $pIdx => $pair) {
+                            $expectedRight = trim(mb_strtolower($pair['right'] ?? ''));
+                            $studentChoice = isset($submitted[$pIdx]) ? trim(mb_strtolower($submitted[$pIdx])) : '';
+                            if ($studentChoice !== '' && $studentChoice === $expectedRight) {
+                                $matchCount++;
+                            }
+                        }
+                        if ($totalPairs > 0) {
+                            $earnedPoints += round(($matchCount / $totalPairs) * $qPoints, 1);
+                        }
+                    }
+                }
+            } elseif ($type === 'essay') {
+                // Award completion credit for essay submission
+                if (is_string($submitted) && strlen(trim($submitted)) >= 15) {
+                    $earnedPoints += $qPoints;
+                }
             }
         }
 
-        $percentage = $total > 0 ? round(($score / $total) * 100, 2) : 0;
+        $percentage = $totalPossiblePoints > 0 ? round(($earnedPoints / $totalPossiblePoints) * 100, 2) : 0;
         $passed = $percentage >= $quiz->pass_percentage;
 
         // Record submission
         $submission = QuizSubmission::create([
             'quiz_id' => $quiz->id,
             'user_id' => $user->id,
-            'score' => $score,
-            'total_questions' => $total,
+            'score' => (int) round($earnedPoints),
+            'total_questions' => $totalPossiblePoints,
             'percentage' => $percentage,
             'passed' => $passed,
         ]);
 
-        return redirect()->route('students.classroom', $classroom)->with('success', "Quiz submitted! Your score: {$score}/{$total} ({$percentage}%). " . ($passed ? "🎉 Congratulations, you passed!" : "Keep practicing!"));
+        $feedbackMsg = $passed
+            ? "🎉 Outstanding! You passed the quiz with {$percentage}% ({$earnedPoints}/{$totalPossiblePoints} points)."
+            : "Quiz completed. Your score: {$earnedPoints}/{$totalPossiblePoints} ({$percentage}%). Minimum passing score is {$quiz->pass_percentage}%. Keep studying and try again!";
+
+        return redirect()->route('students.classroom', $classroom)->with('success', $feedbackMsg);
     }
 
     // View certificate

@@ -20,13 +20,24 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $fillable = [
         'name',
+        'username',
         'email',
+        'avatar',
         'phone',
         'password',
         'role',
         'is_banned',
         'ban_reason',
     ];
+
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->avatar) {
+            return asset('storage/' . $this->avatar);
+        }
+        $bg = substr(md5($this->name), 0, 6);
+        return "https://ui-avatars.com/api/?name=" . urlencode($this->name) . "&background=" . $bg . "&color=fff&size=128&bold=true";
+    }
 
     /**
      * The attributes that should be hidden for serialization.

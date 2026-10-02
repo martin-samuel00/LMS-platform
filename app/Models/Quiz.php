@@ -11,6 +11,7 @@ class Quiz extends Model
         'title',
         'description',
         'pass_percentage',
+        'duration_minutes',
     ];
 
     public function classroom()

@@ -407,7 +407,7 @@ class TeacherController extends Controller
         return view('teachers.create-quiz', compact('classroom'));
     }
 
-    // Store a new quiz with multiple-choice questions
+    // Store a new quiz with multi-format questions and timers
     public function storeQuiz(Request $request, Classroom $classroom)
     {
         $this->authorizeTeacherOrAdmin($classroom);
@@ -416,30 +416,70 @@ class TeacherController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'pass_percentage' => ['required', 'integer', 'min:1', 'max:100'],
+            'duration_minutes' => ['nullable', 'integer', 'min:1', 'max:360'],
             'questions' => ['required', 'array', 'min:1'],
             'questions.*.text' => ['required', 'string'],
-            'questions.*.option_a' => ['required', 'string'],
-            'questions.*.option_b' => ['required', 'string'],
-            'questions.*.option_c' => ['required', 'string'],
-            'questions.*.option_d' => ['required', 'string'],
-            'questions.*.correct' => ['required', 'in:a,b,c,d'],
+            'questions.*.type' => ['nullable', 'string', 'in:choose,true_false,complete,match,essay,scientific_term'],
+            'questions.*.timer' => ['nullable', 'integer', 'min:5', 'max:600'],
         ]);
 
         $quiz = $classroom->quizzes()->create([
             'title' => $request->title,
             'description' => $request->description,
             'pass_percentage' => $request->pass_percentage,
+            'duration_minutes' => $request->duration_minutes,
         ]);
 
         foreach ($request->questions as $q) {
-            $quiz->questions()->create([
+            $type = $q['type'] ?? 'choose';
+            $timer = !empty($q['timer']) ? (int) $q['timer'] : null;
+            $points = !empty($q['points']) ? (int) $q['points'] : 1;
+
+            $questionData = [
+                'question_type' => $type,
+                'time_limit_seconds' => $timer,
                 'question_text' => $q['text'],
-                'option_a' => $q['option_a'],
-                'option_b' => $q['option_b'],
-                'option_c' => $q['option_c'],
-                'option_d' => $q['option_d'],
-                'correct_option' => $q['correct'],
-            ]);
+                'points' => $points,
+                'option_a' => $q['option_a'] ?? '-',
+                'option_b' => $q['option_b'] ?? '-',
+                'option_c' => $q['option_c'] ?? '-',
+                'option_d' => $q['option_d'] ?? '-',
+                'correct_option' => $q['correct'] ?? 'a',
+                'correct_answer_text' => null,
+                'matching_pairs' => null,
+            ];
+
+            if ($type === 'true_false') {
+                $questionData['option_a'] = 'True';
+                $questionData['option_b'] = 'False';
+                $questionData['option_c'] = '-';
+                $questionData['option_d'] = '-';
+                $questionData['correct_option'] = strtolower($q['correct'] ?? 'true') === 'true' ? 'a' : 'b';
+            } elseif ($type === 'complete' || $type === 'scientific_term' || $type === 'essay') {
+                $questionData['option_a'] = '-';
+                $questionData['option_b'] = '-';
+                $questionData['option_c'] = '-';
+                $questionData['option_d'] = '-';
+                $questionData['correct_answer_text'] = trim($q['answer_text'] ?? '');
+                $questionData['correct_option'] = 'text';
+            } elseif ($type === 'match') {
+                $pairs = [];
+                if (!empty($q['match_left']) && is_array($q['match_left'])) {
+                    foreach ($q['match_left'] as $idx => $leftItem) {
+                        $rightItem = $q['match_right'][$idx] ?? '';
+                        if (!empty($leftItem) && !empty($rightItem)) {
+                            $pairs[] = [
+                                'left' => trim($leftItem),
+                                'right' => trim($rightItem)
+                            ];
+                        }
+                    }
+                }
+                $questionData['matching_pairs'] = $pairs;
+                $questionData['correct_option'] = 'match';
+            }
+
+            $quiz->questions()->create($questionData);
         }
 
         // Notify enrolled students
@@ -453,7 +493,7 @@ class TeacherController extends Controller
             );
         }
 
-        return redirect()->route('teachers.classroom', $classroom)->with('success', 'Quiz created successfully!');
+        return redirect()->route('teachers.classroom', $classroom)->with('success', 'Comprehensive quiz created and published successfully!');
     }
 
     // Issue a certificate to an enrolled student

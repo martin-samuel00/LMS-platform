@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Classroom Hub</title>
+    <title>Workspace Dashboard - Classroom Hub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/responsive-hub.css') }}">
     <script src="{{ asset('js/responsive-hub.js') }}" defer></script>
     <script>
-        // Apply saved theme preference on load immediately to avoid FOUC
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.setAttribute('data-theme', 'dark');
         } else {
@@ -32,8 +31,7 @@
             --badge-bg: #e0e7ff;
             --badge-text: #4338ca;
             --card-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
-            --card-hover-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.12), 0 8px 10px -6px rgba(99, 102, 241, 0.08);
-            --hero-gradient: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+            --hero-gradient: linear-gradient(135deg, #3b82f6 0%, #4f46e5 50%, #7c3aed 100%);
         }
 
         [data-theme="dark"] {
@@ -50,8 +48,7 @@
             --badge-bg: rgba(99, 102, 241, 0.2);
             --badge-text: #a5b4fc;
             --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
-            --card-hover-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.25), 0 8px 10px -6px rgba(99, 102, 241, 0.15);
-            --hero-gradient: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            --hero-gradient: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
         }
 
         * {
@@ -74,13 +71,13 @@
             flex-direction: column;
         }
 
-        /* Top Navbar */
+        /* Navbar */
         .navbar {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border-color);
-            padding: 16px 36px;
+            padding: 14px 36px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -128,7 +125,7 @@
             text-decoration: none;
             font-size: 13.5px;
             font-weight: 600;
-            padding: 6px 12px;
+            padding: 7px 12px;
             border-radius: 8px;
             transition: all 0.15s;
             display: inline-flex;
@@ -158,7 +155,6 @@
 
         .btn-theme-toggle:hover {
             border-color: var(--highlight);
-            transform: translateY(-1px);
         }
 
         .btn-logout {
@@ -176,13 +172,12 @@
         .btn-logout:hover {
             background: #ef4444;
             color: #ffffff;
-            border-color: #ef4444;
         }
 
         /* Container */
         .container {
-            max-width: 1080px;
-            margin: 32px auto 60px;
+            max-width: 1100px;
+            margin: 28px auto 60px;
             padding: 0 24px;
             width: 100%;
         }
@@ -191,15 +186,15 @@
         .welcome-hero {
             background: var(--hero-gradient);
             color: #ffffff;
-            border-radius: 20px;
-            padding: 32px 36px;
+            border-radius: 22px;
+            padding: 34px 40px;
             margin-bottom: 28px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 20px;
-            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.25);
+            box-shadow: 0 12px 30px -5px rgba(79, 70, 229, 0.3);
             position: relative;
             overflow: hidden;
         }
@@ -209,9 +204,9 @@
             position: absolute;
             right: -60px;
             top: -60px;
-            width: 220px;
-            height: 220px;
-            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+            width: 260px;
+            height: 260px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
             border-radius: 50%;
             pointer-events: none;
         }
@@ -219,36 +214,30 @@
         .welcome-left {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 22px;
         }
 
-        .user-avatar-large {
-            width: 68px;
-            height: 68px;
+        .user-avatar-img {
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(8px);
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            font-weight: 800;
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
             flex-shrink: 0;
+            background: #fff;
         }
 
         .welcome-hero h1 {
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 800;
             margin-bottom: 4px;
             letter-spacing: -0.5px;
         }
 
         .welcome-hero p {
-            font-size: 14px;
-            opacity: 0.9;
+            font-size: 14.5px;
+            opacity: 0.92;
         }
 
         .welcome-pills {
@@ -256,23 +245,33 @@
             gap: 8px;
             margin-top: 10px;
             flex-wrap: wrap;
+            align-items: center;
         }
 
         .role-pill {
-            background: rgba(255, 255, 255, 0.18);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.35);
             color: #fff;
-            padding: 3px 10px;
+            padding: 4px 12px;
             border-radius: 9999px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
+        }
+
+        .username-pill {
+            background: rgba(0, 0, 0, 0.25);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: monospace;
         }
 
         .hero-actions {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
         }
 
@@ -280,86 +279,98 @@
             background: #ffffff;
             color: #4f46e5;
             text-decoration: none;
-            padding: 12px 22px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 14px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 14.5px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .btn-hero-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
         }
 
         .btn-hero-secondary {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.16);
             color: #ffffff;
-            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            border: 1.5px solid rgba(255, 255, 255, 0.4);
             text-decoration: none;
-            padding: 11px 20px;
-            border-radius: 10px;
+            padding: 11px 22px;
+            border-radius: 12px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 14.5px;
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .btn-hero-secondary:hover {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.28);
             transform: translateY(-2px);
         }
 
-        /* Alerts */
-        .alert-success {
-            background-color: #ecfdf5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
-            border-radius: 12px;
-            padding: 14px 18px;
-            font-size: 14px;
-            margin-bottom: 24px;
-            font-weight: 500;
+        /* KPI Stat Cards Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 28px;
         }
 
-        [data-theme="dark"] .alert-success {
-            background-color: rgba(16, 185, 129, 0.15);
-            color: #6ee7b7;
-            border-color: #065f46;
-        }
-
-        .alert-warning {
-            background-color: #fffbeb;
-            color: #92400e;
-            border: 1px solid #fde68a;
-            border-radius: 12px;
-            padding: 14px 18px;
-            font-size: 14px;
-            margin-bottom: 24px;
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--border-color);
+            border-radius: 18px;
+            padding: 22px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s, border-color 0.2s;
         }
 
-        [data-theme="dark"] .alert-warning {
-            background-color: rgba(245, 158, 11, 0.15);
-            color: #fcd34d;
-            border-color: #92400e;
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--highlight);
         }
 
-        /* Cards */
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .kpi-num {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.1;
+        }
+
+        .kpi-label {
+            font-size: 12.5px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* Main Workspace Section Cards */
         .card {
             background: var(--card-bg);
-            border-radius: 18px;
+            border-radius: 20px;
             border: 1.5px solid var(--border-color);
-            padding: 28px;
+            padding: 30px;
             box-shadow: var(--card-shadow);
             margin-bottom: 28px;
         }
@@ -372,43 +383,42 @@
         }
 
         .card h2 {
-            font-size: 20px;
+            font-size: 21px;
             font-weight: 800;
             color: var(--text-primary);
             letter-spacing: -0.3px;
         }
 
-        .card p.subtitle {
-            color: var(--text-secondary);
+        .subtitle {
             font-size: 14px;
-            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 22px;
         }
 
-        /* Portals Grid */
+        /* Portals / Actions Grid */
         .portals-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
-            margin-top: 20px;
+            gap: 20px;
         }
 
         .portal-card {
-            background: var(--card-bg);
+            background: var(--subcard-bg);
             border: 1.5px solid var(--border-color);
-            border-radius: 14px;
-            padding: 22px 20px;
+            border-radius: 16px;
+            padding: 24px;
             text-decoration: none;
-            color: inherit;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             flex-direction: column;
+            gap: 12px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
         }
 
         .portal-card:hover {
-            border-color: var(--highlight);
             transform: translateY(-3px);
-            box-shadow: var(--card-hover-shadow);
+            border-color: var(--highlight);
+            box-shadow: 0 12px 24px -6px rgba(79, 70, 229, 0.15);
         }
 
         .portal-icon {
@@ -416,53 +426,51 @@
             height: 44px;
             border-radius: 12px;
             background: var(--badge-bg);
+            color: var(--highlight);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 22px;
-            margin-bottom: 14px;
         }
 
         .portal-card h3 {
-            font-size: 16px;
+            font-size: 16.5px;
             font-weight: 800;
             color: var(--text-primary);
-            margin-bottom: 6px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 6px;
         }
 
         .portal-card p {
-            font-size: 13px;
+            font-size: 13.5px;
             color: var(--text-secondary);
             line-height: 1.5;
+            flex-grow: 1;
         }
 
         .portal-tag {
-            font-size: 12px;
+            font-size: 12.5px;
             font-weight: 700;
             color: var(--highlight);
-            margin-top: auto;
-            padding-top: 14px;
             display: flex;
             align-items: center;
             gap: 4px;
         }
 
-        /* Account Details Grid */
+        /* Profile & Security Strip */
         .account-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 16px;
-            margin-top: 20px;
+            margin-top: 14px;
         }
 
         .account-box {
             background: var(--subcard-bg);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 18px 16px;
+            border-radius: 14px;
+            padding: 18px 20px;
         }
 
         .account-box-label {
@@ -482,6 +490,9 @@
         }
 
         @media (max-width: 992px) {
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
             .portals-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -497,17 +508,43 @@
             .welcome-hero {
                 padding: 24px;
             }
-            .portals-grid {
-                grid-template-columns: 1fr;
+            .welcome-left {
+                flex-direction: column;
+                align-items: flex-start;
             }
-            .account-grid {
+            .kpi-grid, .portals-grid, .account-grid {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Top Navbar -->
+    @php
+        $user = Auth::user();
+        $isTeacher = $user->isTeacher();
+        $isStudent = !$isTeacher && !$user->isAdmin();
+        $isAdmin = $user->isAdmin();
+
+        // Calculate KPI counters
+        $unreadNotesCount = $user->unreadNotifications()->count();
+        $unreadMessagesCount = \App\Models\DirectMessage::where('recipient_id', $user->id)->where('is_read', false)->count();
+
+        if ($isTeacher) {
+            $classroomsCount = $user->taughtClassrooms()->count();
+            $taughtIds = $user->taughtClassrooms()->pluck('id');
+            $pendingRequestsCount = \DB::table('classroom_user')->whereIn('classroom_id', $taughtIds)->where('status', 'pending')->count();
+            $totalQuizzesCount = \App\Models\Quiz::whereIn('classroom_id', $taughtIds)->count();
+        } elseif ($isStudent) {
+            $enrolledCount = $user->enrolledClassrooms()->wherePivot('status', 'approved')->count();
+            $quizSubmissionsCount = \App\Models\QuizSubmission::where('user_id', $user->id)->count();
+            $certsCount = \App\Models\Certificate::where('user_id', $user->id)->count();
+        } else {
+            $totalUsersCount = \App\Models\User::count();
+            $totalClassesCount = \App\Models\Classroom::count();
+        }
+    @endphp
+
+    <!-- Top Navigation Bar -->
     <nav class="navbar">
         <a href="{{ route('dashboard') }}" class="nav-brand">
             <span class="nav-brand-icon">🎓</span>
@@ -527,26 +564,32 @@
             <!-- Notifications Center -->
             <a href="{{ route('notifications.index') }}" class="nav-link" style="position: relative;">
                 <span>🔔</span> Notifications
-                @php $unreadCount = Auth::user()->unreadNotifications()->count(); @endphp
-                @if ($unreadCount > 0)
-                    <span style="background: #ef4444; color: #fff; border-radius: 999px; padding: 2px 7px; font-size: 10px; font-weight: 800; margin-left: 2px;">{{ $unreadCount }}</span>
+                @if ($unreadNotesCount > 0)
+                    <span style="background: #ef4444; color: #fff; border-radius: 999px; padding: 2px 7px; font-size: 10px; font-weight: 800; margin-left: 2px;">{{ $unreadNotesCount }}</span>
                 @endif
             </a>
 
             <!-- Direct Messages -->
             <a href="{{ route('messages.index') }}" class="nav-link">
                 <span>💬</span> Messages
+                @if ($unreadMessagesCount > 0)
+                    <span style="background: #4f46e5; color: #fff; border-radius: 999px; padding: 2px 7px; font-size: 10px; font-weight: 800; margin-left: 2px;">{{ $unreadMessagesCount }}</span>
+                @endif
             </a>
 
-            <!-- Teacher Portal Link -->
-            @if(Auth::user()->isTeacher())
-                <a href="{{ route('teachers.index') }}" class="nav-link">
-                    <span>👩‍🏫</span> Teaching
+            <!-- Role-Specific Portal Link in Navbar (STRICT ISOLATION) -->
+            @if ($isTeacher)
+                <a href="{{ route('teachers.index') }}" class="nav-link" style="color: var(--highlight); font-weight: 700;">
+                    <span>👩‍🏫</span> Instructor Hub
+                </a>
+            @elseif ($isStudent)
+                <a href="{{ route('students.index') }}" class="nav-link" style="color: var(--highlight); font-weight: 700;">
+                    <span>👨‍🎓</span> Student Learning
                 </a>
             @endif
 
-            <!-- Admin Console Badge Link -->
-            @if(Auth::user()->isAdmin())
+            <!-- Admin Console (Admin Only) -->
+            @if ($isAdmin)
                 <a href="{{ route('admin.index') }}" class="nav-link" style="color: #ef4444; font-weight: 700; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
                     <span>🛡️</span> Admin Console
                 </a>
@@ -566,69 +609,73 @@
     </nav>
 
     <div class="container">
-        <!-- Flash Success Notification -->
+        <!-- Flash Alerts -->
         @if (session('success'))
-            <div class="alert-success">
+            <div style="background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; border-radius: 14px; padding: 14px 20px; font-size: 14px; margin-bottom: 24px; font-weight: 600;">
                 &check; {{ session('success') }}
+            </div>
+        @endif
+        @if (session('error'))
+            <div style="background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; border-radius: 14px; padding: 14px 20px; font-size: 14px; margin-bottom: 24px; font-weight: 600;">
+                &times; {{ session('error') }}
             </div>
         @endif
 
         <!-- Email Verification Banner -->
-        @if (!Auth::user()->hasVerifiedEmail())
-            <div class="alert-warning">
+        @if (!$user->hasVerifiedEmail())
+            <div style="background-color: #fffbeb; color: #92400e; border: 1px solid #fde68a; border-radius: 14px; padding: 14px 20px; font-size: 14px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
                 <div>
                     <strong>✉️ Verification Pending:</strong> Please confirm your email address to unlock all account capabilities.
                 </div>
-                <a href="{{ route('verification.notice') }}" style="background: #d97706; color: #fff; padding: 6px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap;">Verify Email &rarr;</a>
+                <a href="{{ route('verification.notice') }}" style="background: #d97706; color: #fff; padding: 7px 16px; border-radius: 10px; text-decoration: none; font-size: 12.5px; font-weight: 700; white-space: nowrap;">Verify Email &rarr;</a>
             </div>
         @endif
 
         <!-- Welcome Hero Header -->
         <div class="welcome-hero">
             <div class="welcome-left">
-                <div class="user-avatar-large">
-                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                </div>
+                <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="user-avatar-img">
                 <div>
-                    <h1>Welcome, {{ Auth::user()->name }}!</h1>
-                    <p>Your unified learning dashboard and academic workspace.</p>
+                    <h1>Welcome, {{ $user->name }}!</h1>
+                    <p>Your unified academic workspace and learning management dashboard.</p>
                     <div class="welcome-pills">
                         <span class="role-pill">
-                            @if(Auth::user()->role === 'admin')
-                                👑 Platform Administrator
-                            @elseif(Auth::user()->role === 'moderator')
-                                🛡️ Platform Moderator
-                            @elseif(Auth::user()->isTeacher())
+                            @if($isAdmin)
+                                👑 Administrator
+                            @elseif($isTeacher)
                                 👩‍🏫 Instructor
                             @else
                                 👨‍🎓 Student
                             @endif
                         </span>
-                        @if (Auth::user()->hasVerifiedEmail())
-                            <span class="role-pill" style="background: rgba(16, 185, 129, 0.25); border-color: rgba(16, 185, 129, 0.4);">
-                                &checkmark; Verified Account
+                        @if ($user->username)
+                            <span class="username-pill">&#64;{{ $user->username }}</span>
+                        @endif
+                        @if ($user->hasVerifiedEmail())
+                            <span class="role-pill" style="background: rgba(16, 185, 129, 0.3); border-color: rgba(16, 185, 129, 0.5);">
+                                &checkmark; Verified
                             </span>
                         @endif
                     </div>
                 </div>
             </div>
 
-            <!-- Role Action Buttons -->
+            <!-- Role Action Buttons (Strict Separation) -->
             <div class="hero-actions">
-                @if (Auth::user()->isAdmin())
+                @if ($isAdmin)
                     <a href="{{ route('admin.index') }}" class="btn-hero-primary" style="background: #ef4444; color: #fff;">
-                        <span>🛡️</span> Open Admin Console &rarr;
+                        <span>🛡️</span> Admin Console &rarr;
                     </a>
-                    <a href="{{ route('teachers.index') }}" class="btn-hero-secondary">
-                        <span>👩‍🏫</span> Teacher Hub
-                    </a>
-                @elseif (Auth::user()->isTeacher())
+                @elseif ($isTeacher)
                     <a href="{{ route('teachers.index') }}" class="btn-hero-primary">
-                        <span>👩‍🏫</span> Open Teacher Portal &rarr;
+                        <span>👩‍🏫</span> Open Teacher Hub &rarr;
+                    </a>
+                    <a href="{{ route('profile.show') }}" class="btn-hero-secondary">
+                        <span>⚙️</span> Edit Profile
                     </a>
                 @else
                     <a href="{{ route('students.index') }}" class="btn-hero-primary">
-                        <span>👨‍🎓</span> Open Student Portal &rarr;
+                        <span>👨‍🎓</span> My Courses &rarr;
                     </a>
                     <a href="{{ route('students.teachers.search') }}" class="btn-hero-secondary">
                         <span>🔍</span> Find Instructors
@@ -637,16 +684,142 @@
             </div>
         </div>
 
-        <!-- Available Portals & Learning Hub Grid -->
+        <!-- KPI Stat Metrics Grid -->
+        <div class="kpi-grid">
+            @if ($isTeacher)
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: rgba(79, 70, 229, 0.12); color: #4f46e5;">🏫</div>
+                    <div>
+                        <div class="kpi-num">{{ $classroomsCount }}</div>
+                        <div class="kpi-label">Active Classrooms</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.15); color: #d97706;">⏳</div>
+                    <div>
+                        <div class="kpi-num">{{ $pendingRequestsCount }}</div>
+                        <div class="kpi-label">Pending Join Requests</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">📝</div>
+                    <div>
+                        <div class="kpi-num">{{ $totalQuizzesCount }}</div>
+                        <div class="kpi-label">Assessments Published</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6;">💬</div>
+                    <div>
+                        <div class="kpi-num">{{ $unreadMessagesCount }}</div>
+                        <div class="kpi-label">Unread Messages</div>
+                    </div>
+                </div>
+            @elseif ($isStudent)
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: rgba(79, 70, 229, 0.12); color: #4f46e5;">📚</div>
+                    <div>
+                        <div class="kpi-num">{{ $enrolledCount }}</div>
+                        <div class="kpi-label">Enrolled Classes</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">🎯</div>
+                    <div>
+                        <div class="kpi-num">{{ $quizSubmissionsCount }}</div>
+                        <div class="kpi-label">Quizzes Completed</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.15); color: #d97706;">📜</div>
+                    <div>
+                        <div class="kpi-num">{{ $certsCount }}</div>
+                        <div class="kpi-label">Certificates Earned</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6;">💬</div>
+                    <div>
+                        <div class="kpi-num">{{ $unreadMessagesCount }}</div>
+                        <div class="kpi-label">Unread Messages</div>
+                    </div>
+                </div>
+            @else
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">🛡️</div>
+                    <div>
+                        <div class="kpi-num">{{ $totalUsersCount }}</div>
+                        <div class="kpi-label">Registered Accounts</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: rgba(79, 70, 229, 0.12); color: #4f46e5;">🏫</div>
+                    <div>
+                        <div class="kpi-num">{{ $totalClassesCount }}</div>
+                        <div class="kpi-label">Active Classrooms</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">🔔</div>
+                    <div>
+                        <div class="kpi-num">{{ $unreadNotesCount }}</div>
+                        <div class="kpi-label">System Notifications</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6;">💬</div>
+                    <div>
+                        <div class="kpi-num">{{ $unreadMessagesCount }}</div>
+                        <div class="kpi-label">Direct Chats</div>
+                    </div>
+                </div>
+            @endif
+        </div>
+
+        <!-- Available Workspaces & Hub Tools (STRICT ROLE ISOLATION) -->
         <div class="card">
             <div class="card-header">
-                <h2>Available Portals & Tools</h2>
+                <h2>Your Academic Workspaces</h2>
             </div>
-            <p class="subtitle">Quick shortcuts to your learning spaces, course management, communications, and settings.</p>
+            <p class="subtitle">Quick shortcuts tailored for your role and daily activities.</p>
 
             <div class="portals-grid">
-                <!-- Portal: Admin (if admin) -->
-                @if(Auth::user()->isAdmin())
+                <!-- TEACHER ONLY CARDS -->
+                @if ($isTeacher)
+                    <a href="{{ route('teachers.index') }}" class="portal-card">
+                        <div class="portal-icon">👩‍🏫</div>
+                        <h3>Teacher Portal &rarr;</h3>
+                        <p>Manage all your classrooms, publish curriculum, assign work with deadline attachments, and review attendance.</p>
+                        <div class="portal-tag">Manage Classes &rarr;</div>
+                    </a>
+
+                    <a href="{{ route('teachers.index') }}" class="portal-card">
+                        <div class="portal-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">📝</div>
+                        <h3>Assessment Center &rarr;</h3>
+                        <p>Construct multi-format quizzes with per-question timers, matching pairs, fill-in blanks, and scientific terms.</p>
+                        <div class="portal-tag" style="color: #10b981;">Create Assessments &rarr;</div>
+                    </a>
+                @endif
+
+                <!-- STUDENT ONLY CARDS -->
+                @if ($isStudent)
+                    <a href="{{ route('students.index') }}" class="portal-card">
+                        <div class="portal-icon">👨‍🎓</div>
+                        <h3>Student Learning Hub &rarr;</h3>
+                        <p>Access your enrolled courses, submit assignments, take self-grading quizzes, and track your attendance.</p>
+                        <div class="portal-tag">Open Coursework &rarr;</div>
+                    </a>
+
+                    <a href="{{ route('students.teachers.search') }}" class="portal-card">
+                        <div class="portal-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">🔍</div>
+                        <h3>Find Instructors &rarr;</h3>
+                        <p>Discover expert teachers, request access to specialized study groups, and expand your education.</p>
+                        <div class="portal-tag" style="color: #3b82f6;">Search Directory &rarr;</div>
+                    </a>
+                @endif
+
+                <!-- ADMIN ONLY CARDS -->
+                @if ($isAdmin)
                     <a href="{{ route('admin.index') }}" class="portal-card" style="border: 2px solid #ef4444; background: rgba(239, 68, 68, 0.03);">
                         <div class="portal-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">🛡️</div>
                         <h3 style="color: #ef4444;">Admin Console &rarr;</h3>
@@ -655,23 +828,7 @@
                     </a>
                 @endif
 
-                <!-- Portal: Student Portal -->
-                <a href="{{ route('students.index') }}" class="portal-card">
-                    <div class="portal-icon">👨‍🎓</div>
-                    <h3>Student Portal &rarr;</h3>
-                    <p>Access your enrolled courses, submit assignments, take self-grading quizzes, and earn certificates.</p>
-                    <div class="portal-tag">Explore Learning &rarr;</div>
-                </a>
-
-                <!-- Portal: Teacher Portal -->
-                <a href="{{ route('teachers.index') }}" class="portal-card">
-                    <div class="portal-icon">👩‍🏫</div>
-                    <h3>Teacher Portal &rarr;</h3>
-                    <p>Create classrooms, post assignments with deadline files, take roll-call, and issue course certificates.</p>
-                    <div class="portal-tag">Manage Classes &rarr;</div>
-                </a>
-
-                <!-- Portal: Notifications Center -->
+                <!-- SHARED TOOLS FOR ALL USERS -->
                 <a href="{{ route('notifications.index') }}" class="portal-card">
                     <div class="portal-icon">🔔</div>
                     <h3>Notifications Hub &rarr;</h3>
@@ -679,7 +836,6 @@
                     <div class="portal-tag">View Alerts &rarr;</div>
                 </a>
 
-                <!-- Portal: 1-on-1 Messages -->
                 <a href="{{ route('messages.index') }}" class="portal-card">
                     <div class="portal-icon">💬</div>
                     <h3>Direct Messages &rarr;</h3>
@@ -687,11 +843,10 @@
                     <div class="portal-tag">Open Chat &rarr;</div>
                 </a>
 
-                <!-- Portal: Profile & Settings -->
                 <a href="{{ route('profile.show') }}" class="portal-card">
                     <div class="portal-icon">⚙️</div>
                     <h3>Profile & Security &rarr;</h3>
-                    <p>Update your personal information, add phone recovery, change password, and toggle Dark Mode.</p>
+                    <p>Upload your profile picture, change your @username, manage email verification, and toggle Dark Mode.</p>
                     <div class="portal-tag">Account Settings &rarr;</div>
                 </a>
             </div>
@@ -701,7 +856,7 @@
         <div class="card">
             <div class="card-header">
                 <h2>Account Credentials & Security</h2>
-                <a href="{{ route('profile.show') }}" style="font-size: 13px; color: var(--highlight); font-weight: 700; text-decoration: none;">Edit Details &rarr;</a>
+                <a href="{{ route('profile.show') }}" style="font-size: 13.5px; color: var(--highlight); font-weight: 700; text-decoration: none;">Edit Profile &rarr;</a>
             </div>
             <p class="subtitle">Summary of your account status and verified credentials.</p>
 
@@ -709,12 +864,10 @@
                 <div class="account-box">
                     <div class="account-box-label">Account Role</div>
                     <div class="account-box-value">
-                        @if(Auth::user()->role === 'admin')
+                        @if($isAdmin)
                             👑 Administrator
-                        @elseif(Auth::user()->role === 'moderator')
-                            🛡️ Moderator
-                        @elseif(Auth::user()->isTeacher())
-                            👩‍🏫 Teacher
+                        @elseif($isTeacher)
+                            👩‍🏫 Instructor
                         @else
                             👨‍🎓 Student
                         @endif
@@ -722,14 +875,16 @@
                 </div>
 
                 <div class="account-box">
-                    <div class="account-box-label">Display Name</div>
-                    <div class="account-box-value">{{ Auth::user()->name }}</div>
+                    <div class="account-box-label">Username</div>
+                    <div class="account-box-value">
+                        {{ $user->username ? '@' . $user->username : 'None set' }}
+                    </div>
                 </div>
 
                 <div class="account-box">
                     <div class="account-box-label">Email Verification</div>
                     <div class="account-box-value">
-                        @if (Auth::user()->hasVerifiedEmail())
+                        @if ($user->hasVerifiedEmail())
                             <span style="color: #10b981;">&check; Verified</span>
                         @else
                             <span style="color: #ef4444;">&times; Pending</span>
@@ -738,10 +893,8 @@
                 </div>
 
                 <div class="account-box">
-                    <div class="account-box-label">Phone Protection</div>
-                    <div class="account-box-value">
-                        {{ Auth::user()->phone ?: 'None added' }}
-                    </div>
+                    <div class="account-box-label">Registered Email</div>
+                    <div class="account-box-value">{{ $user->email }}</div>
                 </div>
             </div>
         </div>
