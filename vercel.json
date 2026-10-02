@@ -25,7 +25,7 @@
   "env": {
     "APP_NAME": "Classroom Hub",
     "APP_ENV": "production",
-    "APP_DEBUG": "true",
+    "APP_DEBUG": "false",
     "APP_KEY": "base64:CkeXb/HvXz2iFqfh2ijkXTRdeDAB5eDi1oO+Np091ec=",
     "APP_CONFIG_CACHE": "/tmp/config.php",
     "APP_EVENTS_CACHE": "/tmp/events.php",
