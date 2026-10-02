@@ -19,6 +19,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Auto-migrate serverless sqlite database on Vercel if needed
+        if (config('database.default') === 'sqlite') {
+            $dbPath = config('database.connections.sqlite.database');
+            if ($dbPath === '/tmp/database.sqlite' && !file_exists('/tmp/.migrated')) {
+                try {
+                    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+                    @touch('/tmp/.migrated');
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::error('Auto-migration error: ' . $e->getMessage());
+                }
+            }
+        }
     }
 }
