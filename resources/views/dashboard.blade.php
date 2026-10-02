@@ -525,22 +525,37 @@
         $isStudent = !$isTeacher && !$user->isAdmin();
         $isAdmin = $user->isAdmin();
 
-        // Calculate KPI counters
-        $unreadNotesCount = $user->unreadNotifications()->count();
-        $unreadMessagesCount = \App\Models\DirectMessage::where('recipient_id', $user->id)->where('is_read', false)->count();
+        // Calculate KPI counters safely
+        $unreadNotesCount = 0;
+        $unreadMessagesCount = 0;
+        $classroomsCount = 0;
+        $pendingRequestsCount = 0;
+        $totalQuizzesCount = 0;
+        $enrolledCount = 0;
+        $quizSubmissionsCount = 0;
+        $certsCount = 0;
+        $totalUsersCount = 0;
+        $totalClassesCount = 0;
 
-        if ($isTeacher) {
-            $classroomsCount = $user->taughtClassrooms()->count();
-            $taughtIds = $user->taughtClassrooms()->pluck('id');
-            $pendingRequestsCount = \DB::table('classroom_user')->whereIn('classroom_id', $taughtIds)->where('status', 'pending')->count();
-            $totalQuizzesCount = \App\Models\Quiz::whereIn('classroom_id', $taughtIds)->count();
-        } elseif ($isStudent) {
-            $enrolledCount = $user->enrolledClassrooms()->wherePivot('status', 'approved')->count();
-            $quizSubmissionsCount = \App\Models\QuizSubmission::where('user_id', $user->id)->count();
-            $certsCount = \App\Models\Certificate::where('user_id', $user->id)->count();
-        } else {
-            $totalUsersCount = \App\Models\User::count();
-            $totalClassesCount = \App\Models\Classroom::count();
+        try {
+            $unreadNotesCount = $user->unreadNotifications()->count();
+            $unreadMessagesCount = $user->receivedDirectMessages()->where('is_read', false)->count();
+
+            if ($isTeacher) {
+                $classroomsCount = $user->taughtClassrooms()->count();
+                $taughtIds = $user->taughtClassrooms()->pluck('id');
+                $pendingRequestsCount = \DB::table('classroom_user')->whereIn('classroom_id', $taughtIds)->where('status', 'pending')->count();
+                $totalQuizzesCount = \App\Models\Quiz::whereIn('classroom_id', $taughtIds)->count();
+            } elseif ($isStudent) {
+                $enrolledCount = $user->enrolledClassrooms()->count();
+                $quizSubmissionsCount = $user->quizSubmissions()->count();
+                $certsCount = $user->certificates()->count();
+            } else {
+                $totalUsersCount = \App\Models\User::count();
+                $totalClassesCount = \App\Models\Classroom::count();
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Dashboard KPI calculation fallback: ' . $e->getMessage());
         }
     @endphp
 

@@ -752,10 +752,10 @@
         </form>
 
         <div class="cta-buttons">
-            <a href="{{ route('register') }}" class="btn-cta-student">
+            <a href="{{ route('register', ['role' => 'student']) }}" class="btn-cta-student">
                 <span>👨‍🎓</span> Join as a Student
             </a>
-            <a href="{{ route('register') }}" class="btn-cta-teacher">
+            <a href="{{ route('register', ['role' => 'teacher']) }}" class="btn-cta-teacher">
                 <span>👩‍🏫</span> Teach a Classroom
             </a>
         </div>
@@ -888,7 +888,7 @@
                     <li><span>&check;</span> Send 1-on-1 direct messages to enrolled students</li>
                     <li><span>&check;</span> Issue official verifiable certificates of completion</li>
                 </ul>
-                <a href="{{ route('register') }}" class="btn-role-action btn-role-teacher">Start Teaching Free &rarr;</a>
+                <a href="{{ route('register', ['role' => 'teacher']) }}" class="btn-role-action btn-role-teacher">Start Teaching Free &rarr;</a>
             </div>
 
             <div class="role-card student-card">
@@ -905,7 +905,7 @@
                     <li><span>&check;</span> Chat directly with instructors and participate in class discussions</li>
                     <li><span>&check;</span> Earn and print official course completion certificates</li>
                 </ul>
-                <a href="{{ route('register') }}" class="btn-role-action btn-role-student">Join as a Student &rarr;</a>
+                <a href="{{ route('register', ['role' => 'student']) }}" class="btn-role-action btn-role-student">Join as a Student &rarr;</a>
             </div>
         </div>
     </section>

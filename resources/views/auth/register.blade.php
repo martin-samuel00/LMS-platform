@@ -413,11 +413,11 @@
                 <label>I am joining as:</label>
                 <div class="role-grid">
                     <label class="role-option">
-                        <input type="radio" name="role" value="student" {{ old('role', 'student') === 'student' ? 'checked' : '' }} required>
+                        <input type="radio" name="role" value="student" {{ old('role', request('role', 'student')) === 'student' ? 'checked' : '' }} required>
                         <span>👨‍🎓 Student</span>
                     </label>
                     <label class="role-option">
-                        <input type="radio" name="role" value="teacher" {{ old('role') === 'teacher' ? 'checked' : '' }} required>
+                        <input type="radio" name="role" value="teacher" {{ old('role', request('role')) === 'teacher' ? 'checked' : '' }} required>
                         <span>👩‍🏫 Teacher</span>
                     </label>
                 </div>

@@ -26,9 +26,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Auto-migrate serverless database on Vercel if needed
         if (!file_exists('/tmp/.migrated_v2')) {
+            @touch('/tmp/.migrated_v2');
             try {
                 \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-                @touch('/tmp/.migrated_v2');
             } catch (\Throwable $e) {
                 \Illuminate\Support\Facades\Log::error('Auto-migration error: ' . $e->getMessage());
             }
