@@ -4,6 +4,13 @@
  * Vercel Serverless Function Bridge for Laravel 12
  */
 
+// If DB_DATABASE is set to 'sys' (MySQL system catalog), correct it to 'test'
+$dbName = getenv('DB_DATABASE');
+if (!$dbName || $dbName === 'sys') {
+    putenv('DB_DATABASE=test');
+    $_ENV['DB_DATABASE'] = 'test';
+}
+
 // If running on Vercel without an external cloud database configured yet,
 // use an auto-initialized SQLite database in /tmp so the site works immediately.
 $cloudHost = getenv('DB_HOST');
