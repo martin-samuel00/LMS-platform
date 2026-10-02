@@ -1,9 +1,9 @@
 /node_modules
+/vendor
 /storage/framework/cache
 /storage/framework/testing
 /storage/framework/views
 /tests
-.git
 .env.example
 Start-Online.bat
 Dockerfile
